@@ -4,10 +4,12 @@ import com.fitness.userservice.dto.RegisterRequest;
 import com.fitness.userservice.dto.UserResponse;
 import com.fitness.userservice.model.User;
 import com.fitness.userservice.repository.UserRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class UserService {
 
     @Autowired
@@ -25,22 +27,17 @@ public class UserService {
         user.setPassword(request.getPassword());
 
         User savedUser = repository.save(user);
-        UserResponse  userResponse = new UserResponse();
-        userResponse.setId(savedUser.getId());
-        userResponse.setFirstName(savedUser.getFirstName());
-        userResponse.setLastName(savedUser.getLastName());
-        userResponse.setEmail(savedUser.getEmail());
-        userResponse.setPassword(savedUser.getPassword());
-        userResponse.setCreatedAt(savedUser.getCreatedAt());
-        userResponse.setUpdatedAt(savedUser.getUpdatedAt());
-
-        return  userResponse;
+        return getUserResponse(savedUser);
     }
 
     public UserResponse getUserProfile(String userId) {
         User user = repository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User Not Found"));
 
+        return getUserResponse(user);
+    }
+
+    private UserResponse getUserResponse(User user) {
         UserResponse  userResponse = new UserResponse();
         userResponse.setId(user.getId());
         userResponse.setFirstName(user.getFirstName());
@@ -54,6 +51,7 @@ public class UserService {
     }
 
     public Boolean existByUserId(String userId) {
+        log.info("Calling User Validation API for userId: {}", userId);
         return repository.existsById((userId));
     }
 }
